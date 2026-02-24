@@ -1,0 +1,7 @@
+# Compiled binaries
+PortSentry
+*.app/
+.DS_Store
+*.o
+*.swp
+*~
