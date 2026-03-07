@@ -6,7 +6,7 @@ A native macOS menu bar app that shows all listening TCP ports and lets you kill
 
 ## Why
 
-Every developer hits "EADDRINUSE: address already in use" multiple times a week. The fix is always the same: find the PID with `lsof`, then `kill` it. PortSentry puts that workflow in your menu bar — glanceable port list, one-click kill, done.
+Every developer hits "EADDRINUSE" multiple times a week. The fix is always `lsof` then `kill`, but it's annoying enough to break your flow. PortSentry puts every listening port in the menu bar with a one-click kill button. It's a 30-second terminal workflow compressed into a single click.
 
 ## Features
 
