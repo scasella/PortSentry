@@ -299,20 +299,9 @@ struct PortSentryView: View {
             Divider().overlay(SentryTheme.border)
             footer
         }
-        .alert("Kill Process?", isPresented: .init(
-            get: { scanner.killConfirmation != nil },
-            set: { if !$0 { scanner.killConfirmation = nil } }
-        )) {
+        .overlay {
             if let port = scanner.killConfirmation {
-                Button("Cancel", role: .cancel) { scanner.killConfirmation = nil }
-                Button("Kill \(port.processName)", role: .destructive) {
-                    scanner.killProcess(port)
-                    scanner.killConfirmation = nil
-                }
-            }
-        } message: {
-            if let port = scanner.killConfirmation {
-                Text("Terminate \(port.processName) (PID \(port.pid)) on port \(port.port)?\n\nSends SIGTERM first, then SIGKILL after 500ms if still running.")
+                killConfirmationOverlay(port: port)
             }
         }
         .overlay(alignment: .bottom) {
@@ -538,6 +527,60 @@ struct PortSentryView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 6)
+    }
+
+    // MARK: - Kill confirmation overlay
+
+    private func killConfirmationOverlay(port: ListeningPort) -> some View {
+        ZStack {
+            Color.black.opacity(0.6)
+                .onTapGesture { scanner.killConfirmation = nil }
+
+            VStack(spacing: 14) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(.orange)
+                Text("Kill Process?")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(SentryTheme.brightText)
+                Text("Terminate \(port.processName) (PID \(port.pid)) on port \(port.port)?\n\nSends SIGTERM first, then SIGKILL after 500ms if still running.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(SentryTheme.text)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                HStack(spacing: 10) {
+                    Button {
+                        scanner.killConfirmation = nil
+                    } label: {
+                        Text("Cancel")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                            .foregroundStyle(SentryTheme.brightText)
+                            .background(SentryTheme.cardBG, in: RoundedRectangle(cornerRadius: 8))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8).stroke(SentryTheme.border, lineWidth: 1)
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    Button {
+                        scanner.killConfirmation = nil
+                        scanner.killProcess(port)
+                    } label: {
+                        Text("Kill \(port.processName)").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(SentryTheme.danger)
+                }
+            }
+            .padding(20)
+            .frame(width: 300)
+            .background(SentryTheme.bg, in: RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12).stroke(SentryTheme.border, lineWidth: 1)
+            )
+        }
     }
 
     // MARK: - Kill result banner
